@@ -1,7 +1,7 @@
 /*
  * OdometryCorrection.java
  */
-package odometer;
+package lab3;
 
 
 import lejos.hardware.ev3.LocalEV3;

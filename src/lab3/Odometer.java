@@ -8,7 +8,7 @@
  * @author Michael Smith
  */
 
-package odometer;
+package lab3;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 

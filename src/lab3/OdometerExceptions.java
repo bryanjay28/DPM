@@ -1,4 +1,4 @@
-package odometer;
+package lab3;
 
 /**
  * This class is used to handle errors regarding the singleton pattern used for the odometer and

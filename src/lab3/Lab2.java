@@ -1,12 +1,10 @@
 // Lab3.java
 package lab3;
 
-import odometer.*;
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.sensor.EV3ColorSensor;
 
 public class Lab2 {
 

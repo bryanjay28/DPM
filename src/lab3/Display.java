@@ -1,8 +1,7 @@
 package lab3;
 
 import java.text.DecimalFormat;
-import odometer.Odometer;
-import odometer.OdometerExceptions;
+
 import lejos.hardware.lcd.TextLCD;
 
 /**

@@ -77,23 +77,19 @@ public class OdometryCorrection implements Runnable {
 				
 			} else if(currentT > 170 && currentT < 190) {
 				county--;
-				currenty = county*squareSize + vCenter-1.2;
+				currenty = county*squareSize + vCenter;
 	
 			} else if(currentT > 260 && currentT < 280) {	
 				countx--;
 				currentx = countx*squareSize + vCenter;
 				
 			}
+      		// Displays line count
             LCD.drawString("countx =" + countx, 0, 4);
             LCD.drawString("county =" + county, 0, 5);
     		
       	}
       
-      
-      // TODO Calculate new (accurate) robot position
-
-      // TODO Update odometer with new calculated (and more accurate) vales
-
       odometer.setXYT(currentx, currenty, currentT);
 
 
@@ -109,8 +105,14 @@ public class OdometryCorrection implements Runnable {
     }
   }
   
+	
+	/**
+	 * A method to determine if black line
+	 * 
+	 * @return 
+	 */ 
   private boolean isLine(float[] RGB) {
-	  if((RGB[0] < 0.075) && (RGB[1] < 0.075) && (RGB[2] <0.075)) {
+	  if((RGB[0] < 0.12) && (RGB[1] < 0.12) && (RGB[2] <0.12)) {
 		  return true;
 	  } else {
 		  return false;

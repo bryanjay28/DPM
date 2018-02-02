@@ -6,7 +6,7 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
-public class Lab2 {
+public class Lab3 {
 
   // Motor Objects, and Robot related parameters
   private static final EV3LargeRegulatedMotor leftMotor =
@@ -17,7 +17,7 @@ public class Lab2 {
   
   public static final double WHEEL_RAD = 2.1;
   public static final double TRACK = 15.79;
-
+  
   public static void main(String[] args) throws OdometerExceptions {
 
     int buttonChoice;
@@ -27,7 +27,8 @@ public class Lab2 {
     OdometryCorrection odometryCorrection = new OdometryCorrection(); // TODO Complete
                                                                       // implementation
     Display odometryDisplay = new Display(lcd); // No need to change
-
+    Navigation navigation = new Navigation(odometer, leftMotor, rightMotor);
+    USNavigation usNavigation = new USNavigation();
 
     do {
       // clear the display
@@ -36,9 +37,9 @@ public class Lab2 {
       // ask the user whether the motors should drive in a square or float
       lcd.drawString("< Left | Right >", 0, 0);
       lcd.drawString("       |        ", 0, 1);
-      lcd.drawString(" Float | Drive  ", 0, 2);
-      lcd.drawString("motors | in a   ", 0, 3);
-      lcd.drawString("       | square ", 0, 4);
+      lcd.drawString("UsNavi |  Navi  ", 0, 2);
+      lcd.drawString("		 | 	      ", 0, 3);
+      lcd.drawString("       | 		  ", 0, 4);
 
       buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
     } while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
@@ -54,40 +55,34 @@ public class Lab2 {
       
       Thread odoThread = new Thread(odometer);
       odoThread.start();
+      
       Thread odoDisplayThread = new Thread(odometryDisplay);
       odoDisplayThread.start();
+      
+      Thread odoCorrectThread = new Thread(odometryCorrection);
+      odoCorrectThread.start();
+      
+      Thread usNavigationThread = new Thread(usNavigation);
+      usNavigationThread.start();      
+      
 
     } else {
       // clear the display
       lcd.clear();
 
-      // ask the user whether odometery correction should be run or not
-      lcd.drawString("< Left | Right >", 0, 0);
-      lcd.drawString("  No   | with   ", 0, 1);
-      lcd.drawString(" corr- | corr-  ", 0, 2);
-      lcd.drawString(" ection| ection ", 0, 3);
-      lcd.drawString("       |        ", 0, 4);
-
-      buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
-
+      
       // Start odometer and display threads
       Thread odoThread = new Thread(odometer);
       odoThread.start();
+      
       Thread odoDisplayThread = new Thread(odometryDisplay);
       odoDisplayThread.start();
-
-      // Start correction if right button was pressed
-      if (buttonChoice == Button.ID_RIGHT) {
-        Thread odoCorrectionThread = new Thread(odometryCorrection);
-        odoCorrectionThread.start();
-      }
-
-      // spawn a new Thread to avoid SquareDriver.drive() from blocking
-      (new Thread() {
-        public void run() {
-          SquareDriver.drive(leftMotor, rightMotor, WHEEL_RAD, WHEEL_RAD, TRACK);
-        }
-      }).start();
+      
+      Thread odoCorrectThread = new Thread(odometryCorrection);
+      odoCorrectThread.start();
+      
+      Thread navigationThread = new Thread(navigation);
+      navigationThread.start();
     }
 
     while (Button.waitForAnyPress() != Button.ID_ESCAPE);

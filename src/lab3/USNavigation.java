@@ -18,10 +18,61 @@ public class USNavigation extends Thread {
 	private static final int FORWARD_SPEED = 180;
 	private static final int ROTATE_SPEED = 100;
 	private static final double TILE_SIZE = 30.48;
+	
+	private static final int bandCenter = 30; // Offset from the wall (cm)
+	private static final int bandWidth = 3; // Width of dead band (cm)
+	private static final int motorLow = 140; // Speed of slower rotating wheel (deg/sec)
+	private static final int motorHigh = 280; // Speed of the faster rotating wheel (deg/sec)
+	
+	private int distance;
 
 	private boolean navigate = true;
 
+	public USNavigation(Odometer odo, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor) {
+		this.odometer = odo;
+		this.rightMotor = rightMotor;
+		this.leftMotor = leftMotor;
+	}
 	
+	public void processUSData(int distance) {
+		this.distance = distance;
+		// TODO: process a movement based on the us distance passed in (BANG-BANG style)
+
+		// right when robot is out of bandwidth and close to the wall
+		if (bandCenter - bandWidth > distance) {
+
+			// Safety for when robot is very close to the wall
+			// Hardcoded value to compare the closeness to the wall
+
+			if (bandCenter - bandWidth > distance - 20) {
+
+				// reverse one wheel and continue the next
+				rightMotor.setSpeed(250);
+				rightMotor.backward();
+				leftMotor.setSpeed(100);
+
+			} else {
+				leftMotor.setSpeed(motorHigh + 50);
+				rightMotor.setSpeed(motorLow);
+				rightMotor.forward();
+
+			}
+
+			// left when robot is out of bandwidth and far to the wall
+		} else if (bandCenter + bandWidth < distance) {
+
+			leftMotor.setSpeed(motorLow + 25);
+			rightMotor.setSpeed(motorHigh);
+
+			leftMotor.forward();
+			rightMotor.forward();
+
+		}
+	}
+
+	public int readUSDistance() {
+		return this.distance;
+	}
 	
 	// main run method for USnavigation
 		public void run() {

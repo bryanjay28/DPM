@@ -131,10 +131,8 @@ public class Odometer extends OdometerData implements Runnable {
       dX = dDisplace*Math.sin(Theta);
       dY = dDisplace*Math.cos(Theta);
       
-//      X = X + dX;
-//      Y = Y + dY;
+
       // TODO Update odometer values with new calculated values
-//      odo.update(0.5, 1.7, 20.1);
       odo.update(dX, dY, dTheta*180/Math.PI);
 
       // this ensures that the odometer only runs once every period

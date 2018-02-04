@@ -5,87 +5,90 @@ import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.SampleProvider;
 
 public class Lab3 {
 
-  // Motor Objects, and Robot related parameters
-  private static final EV3LargeRegulatedMotor leftMotor =
-      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-  private static final EV3LargeRegulatedMotor rightMotor =
-      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-  private static final TextLCD lcd = LocalEV3.get().getTextLCD();
-  
-  public static final double WHEEL_RAD = 2.1;
-  public static final double TRACK = 15.79;
-  
-  public static void main(String[] args) throws OdometerExceptions {
+	// Motor Objects, and Robot related parameters
+	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
+	private static final Port usPort = LocalEV3.get().getPort("S2");
 
-    int buttonChoice;
+	public static final double WHEEL_RAD = 2.1;
+	public static final double TRACK = 15.79;
 
-    // Odometer related objects
-    Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD); // TODO Complete implementation
-    OdometryCorrection odometryCorrection = new OdometryCorrection(); // TODO Complete
-                                                                      // implementation
-    Display odometryDisplay = new Display(lcd); // No need to change
-    Navigation navigation = new Navigation(odometer, leftMotor, rightMotor);
-    USNavigation usNavigation = new USNavigation();
+	public static void main(String[] args) throws OdometerExceptions {
 
-    do {
-      // clear the display
-      lcd.clear();
+		int buttonChoice;
 
-      // ask the user whether the motors should drive in a square or float
-      lcd.drawString("< Left | Right >", 0, 0);
-      lcd.drawString("       |        ", 0, 1);
-      lcd.drawString("UsNavi |  Navi  ", 0, 2);
-      lcd.drawString("		 | 	      ", 0, 3);
-      lcd.drawString("       | 		  ", 0, 4);
+		// Odometer related objects
+		Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD); // TODO Complete
+																							// implementation
+		Display odometryDisplay = new Display(lcd); // No need to change
 
-      buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
-    } while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
+	    @SuppressWarnings("resource")							    // Because we don't bother to close this resource
+		SensorModes ultrasonicSensor = new EV3UltrasonicSensor(usPort);		// usSensor is the instance
+		SampleProvider usDistance = ultrasonicSensor.getMode("Distance");	// usDistance provides samples from this instance
+		float[] usData = new float[1];		// usData is the buffer in which data are returned
+		UltrasonicPoller usPoller = null;									// the selected controller on each cycle
 
-    if (buttonChoice == Button.ID_LEFT) {
-      // Float the motors
-      leftMotor.forward();
-      leftMotor.flt();
-      rightMotor.forward();
-      rightMotor.flt();
+		do {
+			// clear the display
+			lcd.clear();
 
-      // Display changes in position as wheels are (manually) moved
-      
-      Thread odoThread = new Thread(odometer);
-      odoThread.start();
-      
-      Thread odoDisplayThread = new Thread(odometryDisplay);
-      odoDisplayThread.start();
-      
-      Thread odoCorrectThread = new Thread(odometryCorrection);
-      odoCorrectThread.start();
-      
-      Thread usNavigationThread = new Thread(usNavigation);
-      usNavigationThread.start();      
-      
+			// ask the user whether the motors should drive in a square or float
+			lcd.drawString("< Left | Right >", 0, 0);
+			lcd.drawString("       |        ", 0, 1);
+			lcd.drawString("UsNavi |  Navi  ", 0, 2);
+			lcd.drawString("       | 	    ", 0, 3);
+			lcd.drawString("       | 		", 0, 4);
 
-    } else {
-      // clear the display
-      lcd.clear();
+			buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
+		} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
 
-      
-      // Start odometer and display threads
-      Thread odoThread = new Thread(odometer);
-      odoThread.start();
-      
-      Thread odoDisplayThread = new Thread(odometryDisplay);
-      odoDisplayThread.start();
-      
-      Thread odoCorrectThread = new Thread(odometryCorrection);
-      odoCorrectThread.start();
-      
-      Thread navigationThread = new Thread(navigation);
-      navigationThread.start();
-    }
+		if (buttonChoice == Button.ID_LEFT) {
+			// Float the motors
+			leftMotor.forward();
+			leftMotor.flt();
+			rightMotor.forward();
+			rightMotor.flt();
 
-    while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-    System.exit(0);
-  }
+			USNavigation usNavigation = new USNavigation(odometer, leftMotor, rightMotor);
+			usPoller = new UltrasonicPoller(usDistance, usData, usNavigation);
+
+			Thread odoThread = new Thread(odometer);
+			odoThread.start();
+
+			Thread odoDisplayThread = new Thread(odometryDisplay);
+			odoDisplayThread.start();
+			
+		    usPoller.start();
+
+			Thread usNavigationThread = new Thread(usNavigation);
+			usNavigationThread.start();
+
+		} else {
+			// clear the display
+			lcd.clear();
+			Navigation navigation = new Navigation(odometer, leftMotor, rightMotor);
+
+			// Start odometer and display threads
+			Thread odoThread = new Thread(odometer);
+			odoThread.start();
+
+			Thread odoDisplayThread = new Thread(odometryDisplay);
+			odoDisplayThread.start();
+
+			Thread navigationThread = new Thread(navigation);
+			navigationThread.start();
+		}
+
+		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
+			;
+		System.exit(0);
+	}
 }

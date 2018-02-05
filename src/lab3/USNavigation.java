@@ -1,12 +1,16 @@
+// Lab2.javaAVIbstpackage lab3;
 package lab3;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.robotics.SampleProvider;
 
-public class USNavigation extends Thread implements UltrasonicController {
+public class USNavigation extends Thread {
 
 	private Odometer odometer;
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
+	private SampleProvider us;
+	private float[] usData;
 
 	private double deltax;
 	private double deltay;
@@ -15,21 +19,29 @@ public class USNavigation extends Thread implements UltrasonicController {
 	private double curry;
 	private double currTheta;
 
-	private double destx;
-	private double desty;
-	
 	private static final int FORWARD_SPEED = 180;
 	private static final int ROTATE_SPEED = 100;
 	private static final double TILE_SIZE = 30.48;
 
-	private int distance;
-
 	private boolean navigate = true;
 
-	public USNavigation(Odometer odo, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor) {
+	public USNavigation(Odometer odo, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor,
+			SampleProvider us) {
 		this.odometer = odo;
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
+		this.us = us;
+		this.usData = new float[us.sampleSize()];
+	}
+
+	/**
+	 * A method to get the distance from our sensor
+	 * 
+	 * @return
+	 */
+	private int fetchUS() {
+		us.fetchSample(usData, 0);
+		return (int) (usData[0] * 100);
 	}
 
 	/**
@@ -38,8 +50,8 @@ public class USNavigation extends Thread implements UltrasonicController {
 	public void adjustPath() {
 
 		double position[] = odometer.getXYT();
-		if (position[2] > 185 && position[2] < 355) {
-			if (position[0] > TILE_SIZE) {
+		if (position[2] > 180 && position[2] < 355) {
+			if (position[0] < TILE_SIZE) {
 				rightTurn();
 
 			} else {
@@ -53,16 +65,6 @@ public class USNavigation extends Thread implements UltrasonicController {
 				leftTurn();
 			}
 		}
-
-	}
-
-	/**
-	 * A method to read the distance from our sensor
-	 * 
-	 * @return
-	 */
-	public int readUSDistance() {
-		return this.distance;
 	}
 
 	/**
@@ -121,6 +123,28 @@ public class USNavigation extends Thread implements UltrasonicController {
 	}
 
 	/**
+	 * A method to determine the direction the robot is facing
+	 * 
+	 * @param x
+	 *            X-Coordinate
+	 * @param y
+	 *            Y-Coordinate
+	 */
+	private void determineHeading(double x, double y) {
+		currx = odometer.getXYT()[0];
+		curry = odometer.getXYT()[1];
+
+		deltax = x - currx;
+		deltay = y - curry;
+
+		// Calculate the minimum angle to turn around
+		currTheta = (odometer.getXYT()[2]) * Math.PI / 180;
+		double minTheta = Math.atan2(deltax, deltay) - currTheta;
+		turnTo(minTheta);
+
+	}
+
+	/**
 	 * A method to drive our vehicle to a certain Cartesian coordinate
 	 * 
 	 * @param x
@@ -129,49 +153,51 @@ public class USNavigation extends Thread implements UltrasonicController {
 	 *            Y-Coordinate
 	 */
 	void travelTo(double x, double y) {
-		
+
 		navigate = true;
+		determineHeading(x, y);
 
 		while (navigate) {
 
-			if (distance < 13) {
+			int dist = fetchUS();
 
-				leftMotor.stop(true);
+			if (dist < 15) {
+				leftMotor.stop();
 				rightMotor.stop();
-				
 				adjustPath();
+				determineHeading(x, y);
+				continue;
 			}
 
 			currx = odometer.getXYT()[0];
 			curry = odometer.getXYT()[1];
 
-			this.destx = x;
-			this.desty = y;
-
 			deltax = x - currx;
 			deltay = y - curry;
 
-			// Calculate the minimum angle to turn around
-			currTheta = (odometer.getXYT()[2]) * Math.PI / 180;
-			double minTheta = Math.atan2(deltax, deltay) - currTheta;
 			double hypot = Math.hypot(deltax, deltay);
 
+			// Stop when vehicle is at waypoint
+			if (hypot < 0.5) {
+				navigate = false;
+			}
+
 			// Turn to correct angle towards the endpoint
-			turnTo(minTheta);
 
 			leftMotor.setSpeed(FORWARD_SPEED);
 			rightMotor.setSpeed(FORWARD_SPEED);
 
-			leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), true);
-			rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), false);
+			leftMotor.forward();
+			rightMotor.forward();
+			// leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), true);
+			// rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), false);
 
 			// stop vehicle
-			leftMotor.stop(true);
-			rightMotor.stop(true);
-			// done navigating
-			navigate = false;
+			// leftMotor.stop(true);
+			// rightMotor.stop(true);
 		}
-
+		leftMotor.stop();
+		rightMotor.stop();
 	}
 
 	/**
@@ -225,9 +251,9 @@ public class USNavigation extends Thread implements UltrasonicController {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 
-	@Override
-	public void processUSData(int distance) {
-		// TODO Auto-generated method stub
-		
-	}
+	// @Override
+	// public void processUSData(int distance) {
+	// TODO Auto-generated method stub
+
+	// }
 }

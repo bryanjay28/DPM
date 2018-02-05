@@ -1,4 +1,3 @@
-// Lab3.java
 package lab3;
 
 import lejos.hardware.Button;
@@ -16,7 +15,7 @@ public class Lab3 {
 	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
-	private static final Port usPort = LocalEV3.get().getPort("S2");
+	private static final Port usPort = LocalEV3.get().getPort("S3");
 
 	public static final double WHEEL_RAD = 2.1;
 	public static final double TRACK = 15.79;
@@ -30,11 +29,13 @@ public class Lab3 {
 																							// implementation
 		Display odometryDisplay = new Display(lcd); // No need to change
 
-	    @SuppressWarnings("resource")							    // Because we don't bother to close this resource
-		SensorModes ultrasonicSensor = new EV3UltrasonicSensor(usPort);		// usSensor is the instance
-		SampleProvider usDistance = ultrasonicSensor.getMode("Distance");	// usDistance provides samples from this instance
-		float[] usData = new float[1];		// usData is the buffer in which data are returned
-		UltrasonicPoller usPoller = null;									// the selected controller on each cycle
+		@SuppressWarnings("resource") // Because we don't bother to close this resource
+		SensorModes ultrasonicSensor = new EV3UltrasonicSensor(usPort); // usSensor is the instance
+		SampleProvider usDistance = ultrasonicSensor.getMode("Distance"); // usDistance provides samples from this
+																			// instance
+		// float[] usData = new float[1]; // usData is the buffer in which data are
+		// returned
+		// UltrasonicPoller usPoller = null; // the selected controller on each cycle
 
 		do {
 			// clear the display
@@ -51,22 +52,17 @@ public class Lab3 {
 		} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
 
 		if (buttonChoice == Button.ID_LEFT) {
-			// Float the motors
-			leftMotor.forward();
-			leftMotor.flt();
-			rightMotor.forward();
-			rightMotor.flt();
 
-			USNavigation usNavigation = new USNavigation(odometer, leftMotor, rightMotor);
-			usPoller = new UltrasonicPoller(usDistance, usData, usNavigation);
+			USNavigation usNavigation = new USNavigation(odometer, rightMotor, leftMotor, usDistance);
+			// usPoller = new UltrasonicPoller(usDistance, usData, usNavigation);
 
 			Thread odoThread = new Thread(odometer);
 			odoThread.start();
 
 			Thread odoDisplayThread = new Thread(odometryDisplay);
 			odoDisplayThread.start();
-			
-		    usPoller.start();
+
+			// usPoller.start();
 
 			Thread usNavigationThread = new Thread(usNavigation);
 			usNavigationThread.start();

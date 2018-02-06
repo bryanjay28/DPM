@@ -11,10 +11,12 @@ public class Navigation extends Thread {
 	private double deltax;
 	private double deltay;
 
+	// current location of the vehicle
 	private double currx;
 	private double curry;
 	private double currTheta;
 
+	// set constants
 	private static final int FORWARD_SPEED = 180;
 	private static final int ROTATE_SPEED = 100;
 	private static final double TILE_SIZE = 30.48;
@@ -30,11 +32,21 @@ public class Navigation extends Thread {
 
 	// main run method for navigation
 	public void run() {
-		travelTo(TILE_SIZE, 2 * TILE_SIZE);
+//		travelTo(0.0, 2 * TILE_SIZE);
+//		travelTo(TILE_SIZE, TILE_SIZE);
+//		travelTo(2*TILE_SIZE, 2*TILE_SIZE);
+//		travelTo(2 * TILE_SIZE, TILE_SIZE);
+//		travelTo(TILE_SIZE, 0.0);
+//		travelTo(TILE_SIZE, 0.0);
+//		travelTo(2 * TILE_SIZE, TILE_SIZE);
+//		travelTo(2*TILE_SIZE, 2*TILE_SIZE);
+//		travelTo(0.0, 2 * TILE_SIZE);
+//		travelTo(TILE_SIZE, TILE_SIZE);
+		travelTo(TILE_SIZE, 0.0);
+		travelTo(2*TILE_SIZE, TILE_SIZE);
 		travelTo(2 * TILE_SIZE, 2 * TILE_SIZE);
-		travelTo(0.0, 0.0);
-		travelTo(2 * TILE_SIZE, TILE_SIZE);
-
+		travelTo(0.0, 2 * TILE_SIZE);
+		travelTo(TILE_SIZE, TILE_SIZE);
 	}
 
 	/**
@@ -45,7 +57,7 @@ public class Navigation extends Thread {
 	 * @param y
 	 *            Y-Coordinate
 	 */
-	void travelTo(double x, double y) {
+	private void travelTo(double x, double y) {
 
 		navigate = true;
 		currx = odometer.getXYT()[0];
@@ -54,13 +66,14 @@ public class Navigation extends Thread {
 		deltax = x - currx;
 		deltay = y - curry;
 
-		// Calculate the minimum angle to turn around
+		// Calculate the angle to turn around
 		currTheta = (odometer.getXYT()[2]) * Math.PI / 180;
-		double minTheta = Math.atan2(deltax, deltay) - currTheta;
+		double mTheta = Math.atan2(deltax, deltay) - currTheta;
+
 		double hypot = Math.hypot(deltax, deltay);
 
-		// Turn to correct angle towards the endpoint
-		turnTo(minTheta);
+		// Turn to the correct angle towards the endpoint
+		turnTo(mTheta);
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
@@ -81,7 +94,14 @@ public class Navigation extends Thread {
 	 * 
 	 * @param theta
 	 */
-	void turnTo(double theta) {
+	private void turnTo(double theta) {
+
+		// ensures minimum angle for turning
+		if (theta > Math.PI) {
+			theta -= 2 * Math.PI;
+		} else if (theta < -Math.PI) {
+			theta += 2 * Math.PI;
+		}
 
 		// set Speed
 		leftMotor.setSpeed(ROTATE_SPEED);
@@ -123,6 +143,15 @@ public class Navigation extends Thread {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
+	/**
+	 * This method allows the conversion of a angle to the total rotation of each
+	 * wheel need to cover that distance.
+	 * 
+	 * @param radius
+	 * @param distance
+	 * @param angle
+	 * @return
+	 */
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}

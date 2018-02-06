@@ -19,7 +19,7 @@ public class USNavigation extends Thread {
 	private double curry;
 	private double currTheta;
 
-	private static final int FORWARD_SPEED = 180;
+	private static final int FORWARD_SPEED = 170;
 	private static final int ROTATE_SPEED = 100;
 	private static final double TILE_SIZE = 30.48;
 
@@ -59,10 +59,13 @@ public class USNavigation extends Thread {
 			}
 		} else {
 			if (position[0] > TILE_SIZE) {
-				rightTurn();
-
-			} else {
 				leftTurn();
+			} else {
+				if(position[2] < 100 && position[2] >80) {
+					leftTurn();
+				} else {
+					rightTurn();
+				}
 			}
 		}
 	}
@@ -90,6 +93,12 @@ public class USNavigation extends Thread {
 		leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
 		rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
 
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+
+		leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE + 10), true);
+		rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE + 10), false);
+
 	}
 
 	/**
@@ -114,12 +123,28 @@ public class USNavigation extends Thread {
 
 		leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
 		rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
+
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+
+		leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE + 10), true);
+		rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE + 10), false);
 	}
 
 	// main run method for USnavigation
 	public void run() {
 
+		travelTo(TILE_SIZE, 0.0);
+		travelTo(2*TILE_SIZE, TILE_SIZE);
+		travelTo(2 * TILE_SIZE, 2 * TILE_SIZE);
 		travelTo(0.0, 2 * TILE_SIZE);
+		travelTo(TILE_SIZE, TILE_SIZE);
+		
+//		travelTo(0.0, TILE_SIZE);
+//		travelTo(TILE_SIZE, 2* TILE_SIZE);
+//		travelTo(TILE_SIZE, 0.0);
+//		travelTo(2*TILE_SIZE, TILE_SIZE);
+//		travelTo(2*TILE_SIZE, 2*TILE_SIZE);
 	}
 
 	/**
@@ -152,7 +177,7 @@ public class USNavigation extends Thread {
 	 * @param y
 	 *            Y-Coordinate
 	 */
-	void travelTo(double x, double y) {
+	private void travelTo(double x, double y) {
 
 		navigate = true;
 		determineHeading(x, y);
@@ -161,8 +186,9 @@ public class USNavigation extends Thread {
 
 			int dist = fetchUS();
 
-			if (dist < 15) {
-				leftMotor.stop();
+			if (dist < 10) {
+
+				leftMotor.stop(true);
 				rightMotor.stop();
 				adjustPath();
 				determineHeading(x, y);
@@ -196,7 +222,7 @@ public class USNavigation extends Thread {
 			// leftMotor.stop(true);
 			// rightMotor.stop(true);
 		}
-		leftMotor.stop();
+		leftMotor.stop(true);
 		rightMotor.stop();
 	}
 
@@ -205,13 +231,17 @@ public class USNavigation extends Thread {
 	 * 
 	 * @param theta
 	 */
-	void turnTo(double theta) {
+	private void turnTo(double theta) {
 
-		// set Speed
-		leftMotor.setSpeed(ROTATE_SPEED);
-		rightMotor.setSpeed(ROTATE_SPEED);
+		if (theta > Math.PI) {
+			theta -= 2 * Math.PI;
+		} else if (theta < -Math.PI) {
+			theta += 2 * Math.PI;
+		}
 
 		// rotate motors at set speed
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 
 		// if angle is negative, turn to the left
 		if (theta < 0) {

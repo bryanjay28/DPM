@@ -1,5 +1,5 @@
-// Lab2.javaAVIbstpackage lab3;
-package lab3;
+// Lab3.javaAVIbstpackage lab3;
+package ca.mcgill.ecse211.lab3;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
@@ -19,12 +19,14 @@ public class USNavigation extends Thread {
 	private double curry;
 	private double currTheta;
 
+	// diving constants
 	private static final int FORWARD_SPEED = 170;
 	private static final int ROTATE_SPEED = 100;
 	private static final double TILE_SIZE = 30.48;
 
 	private boolean navigate = true;
 
+	// constructor for USnav
 	public USNavigation(Odometer odo, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor,
 			SampleProvider us) {
 		this.odometer = odo;
@@ -61,7 +63,7 @@ public class USNavigation extends Thread {
 			if (position[0] > TILE_SIZE) {
 				leftTurn();
 			} else {
-				if(position[2] < 100 && position[2] >80) {
+				if (position[2] < 100 && position[2] > 80) {
 					leftTurn();
 				} else {
 					rightTurn();
@@ -78,18 +80,21 @@ public class USNavigation extends Thread {
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
 
+		// turn 90 degrees to avoid obstacle
 		leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
 		rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 
+		// move to the left by a tile size
 		leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE), true);
 		rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE), false);
 
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
 
+		// turn again 90 back and move past the block
 		leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
 		rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
 
@@ -109,18 +114,21 @@ public class USNavigation extends Thread {
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
 
+		// turn 90 degrees to avoid obstacle
 		leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
 		rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 
+		// move to the left by a tile size
 		leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE), true);
 		rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, TILE_SIZE), false);
 
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
 
+		// turn again 90 back and move past the block
 		leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
 		rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
 
@@ -139,12 +147,7 @@ public class USNavigation extends Thread {
 		travelTo(2 * TILE_SIZE, 2 * TILE_SIZE);
 		travelTo(0.0, 2 * TILE_SIZE);
 		travelTo(TILE_SIZE, TILE_SIZE);
-		
-//		travelTo(0.0, TILE_SIZE);
-//		travelTo(TILE_SIZE, 2* TILE_SIZE);
-//		travelTo(TILE_SIZE, 0.0);
-//		travelTo(2*TILE_SIZE, TILE_SIZE);
-//		travelTo(2*TILE_SIZE, 2*TILE_SIZE);
+
 	}
 
 	/**
@@ -182,10 +185,12 @@ public class USNavigation extends Thread {
 		navigate = true;
 		determineHeading(x, y);
 
+		// while navigating to waypoint we want to continuously check for blocks
 		while (navigate) {
 
 			int dist = fetchUS();
 
+			// when 10cm away we will stop and readjust our course
 			if (dist < 10) {
 
 				leftMotor.stop(true);
@@ -201,6 +206,7 @@ public class USNavigation extends Thread {
 			deltax = x - currx;
 			deltay = y - curry;
 
+			// determine our distance from final position
 			double hypot = Math.hypot(deltax, deltay);
 
 			// Stop when vehicle is at waypoint
@@ -215,12 +221,7 @@ public class USNavigation extends Thread {
 
 			leftMotor.forward();
 			rightMotor.forward();
-			// leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), true);
-			// rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), false);
 
-			// stop vehicle
-			// leftMotor.stop(true);
-			// rightMotor.stop(true);
 		}
 		leftMotor.stop(true);
 		rightMotor.stop();
@@ -280,10 +281,4 @@ public class USNavigation extends Thread {
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
-
-	// @Override
-	// public void processUSData(int distance) {
-	// TODO Auto-generated method stub
-
-	// }
 }

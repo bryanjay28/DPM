@@ -1,4 +1,4 @@
-package lab3;
+package ca.mcgill.ecse211.lab3;
 
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
@@ -39,7 +39,7 @@ public class Lab3 {
 			// clear the display
 			lcd.clear();
 
-			// ask the user whether the motors should drive in a square or float
+			// ask the user whether the motors should drive with navigation or avoidance
 			lcd.drawString("< Left | Right >", 0, 0);
 			lcd.drawString("       |        ", 0, 1);
 			lcd.drawString("UsNavi |  Navi  ", 0, 2);
@@ -53,12 +53,14 @@ public class Lab3 {
 
 			USNavigation usNavigation = new USNavigation(odometer, rightMotor, leftMotor, usDistance);
 
+			// Start odometer and display threads
 			Thread odoThread = new Thread(odometer);
 			odoThread.start();
 
 			Thread odoDisplayThread = new Thread(odometryDisplay);
 			odoDisplayThread.start();
 
+			// start ultrasonic navigation thread
 			Thread usNavigationThread = new Thread(usNavigation);
 			usNavigationThread.start();
 
@@ -74,6 +76,7 @@ public class Lab3 {
 			Thread odoDisplayThread = new Thread(odometryDisplay);
 			odoDisplayThread.start();
 
+			// start navigation thread
 			Thread navigationThread = new Thread(navigation);
 			navigationThread.start();
 		}

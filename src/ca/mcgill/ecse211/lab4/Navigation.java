@@ -1,4 +1,4 @@
-package lab3;
+package ca.mcgill.ecse211.lab4;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
@@ -19,7 +19,6 @@ public class Navigation extends Thread {
 	// set constants
 	private static final int FORWARD_SPEED = 180;
 	private static final int ROTATE_SPEED = 100;
-	private static final double TILE_SIZE = 30.48;
 
 	private boolean navigate = true;
 
@@ -30,25 +29,6 @@ public class Navigation extends Thread {
 		this.rightMotor = rightMotor;
 	}
 
-	// main run method for navigation
-	public void run() {
-//		travelTo(0.0, 2 * TILE_SIZE);
-//		travelTo(TILE_SIZE, TILE_SIZE);
-//		travelTo(2*TILE_SIZE, 2*TILE_SIZE);
-//		travelTo(2 * TILE_SIZE, TILE_SIZE);
-//		travelTo(TILE_SIZE, 0.0);
-//		travelTo(TILE_SIZE, 0.0);
-//		travelTo(2 * TILE_SIZE, TILE_SIZE);
-//		travelTo(2*TILE_SIZE, 2*TILE_SIZE);
-//		travelTo(0.0, 2 * TILE_SIZE);
-//		travelTo(TILE_SIZE, TILE_SIZE);
-		travelTo(TILE_SIZE, 0.0);
-		travelTo(2*TILE_SIZE, TILE_SIZE);
-		travelTo(2 * TILE_SIZE, 2 * TILE_SIZE);
-		travelTo(0.0, 2 * TILE_SIZE);
-		travelTo(TILE_SIZE, TILE_SIZE);
-	}
-
 	/**
 	 * A method to drive our vehicle to a certain Cartesian coordinate
 	 * 
@@ -57,9 +37,8 @@ public class Navigation extends Thread {
 	 * @param y
 	 *            Y-Coordinate
 	 */
-	private void travelTo(double x, double y) {
+	public void travelTo(double x, double y) {
 
-		navigate = true;
 		currx = odometer.getXYT()[0];
 		curry = odometer.getXYT()[1];
 
@@ -78,15 +57,12 @@ public class Navigation extends Thread {
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 
-		leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), true);
-		rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, hypot), false);
+		leftMotor.rotate(convertDistance(Lab4.WHEEL_RAD, hypot), true);
+		rightMotor.rotate(convertDistance(Lab4.WHEEL_RAD, hypot), false);
 
 		// stop vehicle
 		leftMotor.stop(true);
 		rightMotor.stop(true);
-		// done navigating
-		navigate = false;
-
 	}
 
 	/**
@@ -94,7 +70,7 @@ public class Navigation extends Thread {
 	 * 
 	 * @param theta
 	 */
-	private void turnTo(double theta) {
+	public void turnTo(double theta) {
 
 		// ensures minimum angle for turning
 		if (theta > Math.PI) {
@@ -111,13 +87,13 @@ public class Navigation extends Thread {
 
 		// if angle is negative, turn to the left
 		if (theta < 0) {
-			leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, -(theta * 180) / Math.PI), true);
-			rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, -(theta * 180) / Math.PI), false);
+			leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, -(theta * 180) / Math.PI), true);
+			rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, -(theta * 180) / Math.PI), false);
 
 		} else {
 			// angle is positive, turn to the right
-			leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, (theta * 180) / Math.PI), true);
-			rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, (theta * 180) / Math.PI), false);
+			leftMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, (theta * 180) / Math.PI), true);
+			rightMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, (theta * 180) / Math.PI), false);
 		}
 	}
 

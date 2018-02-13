@@ -17,8 +17,8 @@ public class Navigation extends Thread {
 	private double currTheta;
 
 	// set constants
-	private static final int FORWARD_SPEED = 180;
-	private static final int ROTATE_SPEED = 100;
+	private static final int FORWARD_SPEED = 100;
+	private static final int ROTATE_SPEED = 60;
 
 	private boolean navigate = true;
 

@@ -17,8 +17,6 @@ public class Lab4 {
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 	private static final Port usPort = LocalEV3.get().getPort("S3");
-	private static final Port lightPort = LocalEV3.get().getPort("S1");
-
 	private static boolean isRisingEdge = true;
 
 	// Set vehicle constants
@@ -38,14 +36,7 @@ public class Lab4 {
 		SensorModes ultrasonicSensor = new EV3UltrasonicSensor(usPort);
 		// usDistance provides samples from this instance
 		SampleProvider usDistance = ultrasonicSensor.getMode("Distance");
-
-		@SuppressWarnings("resource")
-		SensorModes colorSensor = new EV3ColorSensor(lightPort);
-		// colorValue provides samples from this instance
-		SampleProvider colorValue = colorSensor.getMode("Red");
-		// colorData is the buffer in which data are returned
-		float[] colorData = new float[colorValue.sampleSize()];
-
+		
 		do {
 			// clear the display
 			lcd.clear();
@@ -76,7 +67,7 @@ public class Lab4 {
 
 		// Create ultrasonic and light localizer objects.
 		USLocalizer USLocalizer = new USLocalizer(odometer, leftMotor, rightMotor, isRisingEdge, usDistance);
-		LightLocalizer lightLocatizer = new LightLocalizer(odometer, leftMotor, rightMotor, colorValue, colorData);
+		LightLocalizer lightLocatizer = new LightLocalizer(odometer, leftMotor, rightMotor);
 
 		// perform the ultrasonic localization
 		USLocalizer.localize();
@@ -85,7 +76,7 @@ public class Lab4 {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 			
 		// perform the light sensor localization
-//		lightLocatizer.localize();	
+		lightLocatizer.localize();	
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;

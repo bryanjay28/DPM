@@ -108,8 +108,8 @@ public class USLocalizer {
 //		odometer.setXYT(0.0, 0.0, turningAngle);
 //		navigation.turnTo(Math.toRadians(turningAngle - 5));
 		
-		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-3), true);
-		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-3), false);
+		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-6), true);
+		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-6), false);
 
 		odometer.setXYT(0.0, 0.0, 0.0);
 	}
@@ -165,8 +165,8 @@ public class USLocalizer {
 
 //		navigation.turnTo(Math.toRadians(turningAngle - 5));
 		
-		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-3), true);
-		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-3), false);
+		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-1), true);
+		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-1), false);
 
 		odometer.setXYT(0.0, 0.0, 0.0);
 

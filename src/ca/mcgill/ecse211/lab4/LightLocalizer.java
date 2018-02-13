@@ -15,9 +15,8 @@ public class LightLocalizer {
 	private Odometer odometer;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	public Navigation navigation;
-	private static final EV3ColorSensor lightSensor = new EV3ColorSensor(LocalEV3.get().getPort("S1")); // Instantiate
-																										// the EV3 Color
-																										// Sensor
+	// Instantiat the EV3 Color Sensor
+	private static final EV3ColorSensor lightSensor = new EV3ColorSensor(LocalEV3.get().getPort("S1"));
 	private float sample;
 
 	private SensorMode idColour;
@@ -45,8 +44,10 @@ public class LightLocalizer {
 		leftMotor.setSpeed(ROTATION_SPEED);
 		rightMotor.setSpeed(ROTATION_SPEED);
 
+		// ensure that we are close to origin before rotating
 		moveToOrigin();
 
+		// Scan all four lines and record our angle
 		while (index < 4) {
 
 			leftMotor.forward();
@@ -61,30 +62,33 @@ public class LightLocalizer {
 				index++;
 			}
 		}
-		
+
 		leftMotor.stop(true);
 		rightMotor.stop();
 
 		double deltax, deltay, thetax, thetay;
 
+		// calculate our location from 0 using the calculated angles
 		thetay = lineData[3] - lineData[1];
 		thetax = lineData[2] - lineData[0];
 
 		deltax = -1 * SENSOR_LENGTH * Math.cos(Math.toRadians(thetay / 2));
 		deltay = -1 * SENSOR_LENGTH * Math.cos(Math.toRadians(thetax / 2));
 
+		// travel to origin to correct position
 		odometer.setXYT(deltax, deltay, odometer.getXYT()[2] + 6);
 		navigation.travelTo(0.0, 0.0);
-		
-		leftMotor.setSpeed(ROTATION_SPEED/2);
-		rightMotor.setSpeed(ROTATION_SPEED/2);		
 
-		if(odometer.getXYT()[2] <= 350 && odometer.getXYT()[2] >= 10.0) {
+		leftMotor.setSpeed(ROTATION_SPEED / 2);
+		rightMotor.setSpeed(ROTATION_SPEED / 2);
+
+		// if we are not facing 0.0 then turn ourselves so that we are
+		if (odometer.getXYT()[2] <= 350 && odometer.getXYT()[2] >= 10.0) {
 			Sound.beep();
 			leftMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, -odometer.getXYT()[2]), true);
 			rightMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, -odometer.getXYT()[2]), false);
 		}
-		
+
 		leftMotor.stop(true);
 		rightMotor.stop();
 
@@ -100,8 +104,10 @@ public class LightLocalizer {
 		leftMotor.setSpeed(ROTATION_SPEED);
 		rightMotor.setSpeed(ROTATION_SPEED);
 
+		// get sample
 		sample = fetchSample();
 
+		// move forward past the origin until light sensor sees the line
 		while (sample > 0.38) {
 			sample = fetchSample();
 			leftMotor.forward();
@@ -143,23 +149,14 @@ public class LightLocalizer {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 
+	/**
+	 * This method gets the color value of the light sensor
+	 * 
+	 */
 	private float fetchSample() {
 		float[] colorValue = new float[idColour.sampleSize()];
 		idColour.fetchSample(colorValue, 0);
 		return colorValue[0];
-	}
-
-	/**
-	 * This method determines whether the colour of the line is black
-	 * 
-	 * @param RGB
-	 */
-	private boolean isLine(float[] RGB) {
-		if ((RGB[0] < 0.10) && (RGB[1] < 0.10) && (RGB[2] < 0.10)) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 }

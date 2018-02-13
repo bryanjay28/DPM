@@ -28,7 +28,7 @@ public class Lab4 {
 		int buttonChoice;
 
 		// Odometer related objects
-		Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD); 
+		Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 		Display odometryDisplay = new Display(lcd); // No need to change
 
 		@SuppressWarnings("resource") // Because we don't bother to close this resource
@@ -36,7 +36,7 @@ public class Lab4 {
 		SensorModes ultrasonicSensor = new EV3UltrasonicSensor(usPort);
 		// usDistance provides samples from this instance
 		SampleProvider usDistance = ultrasonicSensor.getMode("Distance");
-		
+
 		do {
 			// clear the display
 			lcd.clear();
@@ -71,12 +71,13 @@ public class Lab4 {
 
 		// perform the ultrasonic localization
 		USLocalizer.localize();
-		
+
 		// wait for escape button to be pressed to perform light localization
-		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-			
+		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
+			;
+
 		// perform the light sensor localization
-		lightLocatizer.localize();	
+		lightLocatizer.localize();
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;

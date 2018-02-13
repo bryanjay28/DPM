@@ -16,11 +16,11 @@ public class USLocalizer {
 	private boolean isRisingEdge;
 	private SampleProvider usDistance;
 
-//	 Create a navigation
+	// Create a navigation
 	public Navigation navigation;
 
 	private double d = 40.0;
-	private double k = 2; 
+	private double k = 2;
 
 	/**
 	 * Constructor to initialize variables
@@ -105,12 +105,12 @@ public class USLocalizer {
 
 		turningAngle = deltaTheta + odometer.getXYT()[2];
 
-//		odometer.setXYT(0.0, 0.0, turningAngle);
-//		navigation.turnTo(Math.toRadians(turningAngle - 5));
-		
-		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-6), true);
-		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-6), false);
+		// rotate robot to the theta = 0.0 using turning angle and we account for small
+		// error
+		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle - 6), true);
+		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle - 6), false);
 
+		// set theta = 0.0
 		odometer.setXYT(0.0, 0.0, 0.0);
 	}
 
@@ -156,21 +156,20 @@ public class USLocalizer {
 		// calculate angle of rotation
 		if (angleA < angleB) {
 			deltaTheta = 45 - (angleA + angleB) / 2;
-			
+
 		} else if (angleA > angleB) {
 			deltaTheta = 225 - (angleA + angleB) / 2;
 		}
 
 		turningAngle = deltaTheta + odometer.getXYT()[2];
 
-//		navigation.turnTo(Math.toRadians(turningAngle - 5));
-		
-		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-1), true);
-		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle-1), false);
+		// rotate robot to the theta = 0.0 and we account for small error
+		leftMotor.rotate(-convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle - 1), true);
+		rightMotor.rotate(convertAngle(Lab4.WHEEL_RAD, Lab4.TRACK, turningAngle - 1), false);
 
+		// set odometer to theta = 0
 		odometer.setXYT(0.0, 0.0, 0.0);
 
-		
 	}
 
 	/**
